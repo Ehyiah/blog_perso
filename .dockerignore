@@ -1,0 +1,16 @@
+/.idea/
+/.git/
+/node_modules/
+/vendor/
+/var/
+/.data/
+/build/
+/tests/
+/public/build
+/public/bundles
+/.env.local
+/.env.test
+/.env.test.dist
+/.env.panther
+/docker-compose.*
+/Makefile

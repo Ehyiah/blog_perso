@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+    mailhog:
+        image: mailhog/mailhog:latest
+        ports:
+            - 60081:8025
+            - 60082:1025
+
+    php-quality:
+        build:
+            context: docker/php-fpm
+        volumes:
+            - .:/var/www/symfony:cached
+
+    php:
+        volumes:
+            - ~/.ssh:/root/.ssh
+
+#    ngrok:
+#        image: shkoliar/ngrok:latest
+#        ports:
+#            - 4551:4551
+#        depends_on:
+#            - caddy
+#        environment:
+#            - DOMAIN=caddy
+#            - PORT=80
+#            - REGION=eu
+#            - AUTH_TOKEN=1fJISCKoCUOyRwLI9GxMtBgOK0A_3S7uZcwz2oo7RjJyt9fjH
+#            - HOST_HEADER=blog.localhost

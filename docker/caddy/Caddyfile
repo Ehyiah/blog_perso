@@ -1,0 +1,20 @@
+{
+        # disable https redirection
+        auto_https disable_redirects
+
+        # Debug mode (disable it in production!)
+        {$DEBUG}
+        # HTTP/3 support
+        servers {
+                protocol {
+                        experimental_http3
+                }
+        }
+}
+
+http://blog.localhost https://blog.localhost {
+    root * /var/www/symfony/public/
+    encode zstd gzip
+    file_server
+    php_fastcgi php:9000
+}

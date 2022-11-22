@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - 60081:8025
+      - 60082:1025

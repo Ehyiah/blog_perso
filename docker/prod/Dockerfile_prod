@@ -1,0 +1,102 @@
+#############################################
+###  MultiStage docker application Build  ###
+#############################################
+
+####################
+### Assets pre-build
+####################
+FROM node:14-alpine as assets-build
+
+LABEL maintainer="Matthieu Gostiaux<matthieu@ylly.fr>"
+
+COPY . /var/www/symfony/
+
+WORKDIR /var/www/symfony
+
+RUN yarn install
+RUN yarn encore production
+
+
+#########################
+### Build php application
+#########################
+
+FROM php:8.1-fpm as php
+ARG TIMEZONE="Europe/Paris"
+
+LABEL maintainer="Matthieu Gostiaux<matthieu@ylly.fr>"
+
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+
+RUN apt-get update && apt-get install -y  --fix-missing \
+    openssl \
+    acl \
+    zip \
+    libpq-dev \
+    zlib1g-dev \
+    libzip-dev\
+    libonig-dev \
+    libgmp-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libjpeg62 \
+    libicu-dev \
+    libxml2-dev \
+    libmagickwand-dev \
+    libssl-dev \
+    libcurl4-openssl-dev \
+    gnupg2 \
+    wkhtmltopdf
+
+RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} > /etc/timezone \
+&& printf '[PHP]\ndate.timezone = "%s"\n', ${TIMEZONE} > /usr/local/etc/php/conf.d/tzone.ini
+
+# Type docker-php-ext-install to see available extensions
+RUN docker-php-ext-configure gd --with-jpeg=/usr \
+&& docker-php-source extract \
+&& docker-php-ext-install gd xml mbstring gmp pdo pdo_mysql intl zip opcache \
+&& pecl install imagick \
+&& docker-php-ext-enable imagick \
+&& docker-php-source delete
+
+# CREATE USER
+ARG APP_USER=www-data
+ARG APP_GROUP=www-data
+ARG APP_USER_ID=1000
+ARG APP_GROUP_ID=1000
+
+COPY /docker/php-fpm/scripts /tmp/scripts/
+RUN chmod +x -R /tmp/scripts/
+RUN /tmp/scripts/create-user.sh ${APP_USER} ${APP_GROUP} ${APP_USER_ID} ${APP_GROUP_ID}
+
+RUN rm -rf /var/lib/apt/lists/*
+
+USER $APP_USER
+
+COPY --chown=www-data:www-data . /var/www/symfony/
+COPY /docker/prod/php_prod.ini /usr/local/etc/php/php.ini
+
+WORKDIR /var/www/symfony
+
+RUN APP_ENV=prod composer install --no-dev --optimize-autoloader
+
+COPY --chown=www-data:www-data --from=assets-build /var/www/symfony/public/build/manifest.json /var/www/symfony/public/build/manifest.json
+COPY --chown=www-data:www-data --from=assets-build /var/www/symfony/public/build/entrypoints.json /var/www/symfony/public/build/entrypoints.json
+
+CMD ["php-fpm"]
+
+
+#####################
+###  Web server image
+#####################
+FROM caddy:2.5.2-alpine as web
+
+COPY /docker/prod/Caddyfile_prod /etc/caddy/Caddyfile
+
+COPY --from=assets-build /var/www/symfony/public/build /var/www/symfony/public/build
+COPY --from=php /var/www/symfony/public/bundles /var/www/symfony/public/bundles
+COPY --from=php /var/www/symfony/public/index.php /var/www/symfony/public/index.php
+
+WORKDIR /var/www/symfony
+
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]

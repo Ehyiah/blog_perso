@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  caddy:
+    image: caddy:2.6-alpine
+    working_dir: /etc/caddy
+    depends_on:
+      - php
+    restart: unless-stopped
+    volumes:
+      - ./public:/var/www/symfony/public:delegated
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:delegated
+      - ./.data/caddy_data:/data
+      - ./.data/caddy_config:/config
+    ports:
+      - target: 80
+        published: 8080
+        protocol: tcp
+      - target: 443
+        published: 8443
+        protocol: tcp
+      - target: 443
+        published: 8443
+        protocol: udp
+
+  php:
+    build:
+      context: docker/php-fpm
+    depends_on:
+      - db
+    volumes:
+      - .:/var/www/symfony:cached
+      - ./docker/php-fpm/php.ini:/usr/local/etc/php/php.ini:delegated
+      - ./docker/php-fpm/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini:delegated
+
+  db:
+    image: mariadb:10.7.3
+    working_dir: /var/lib/mysql
+    volumes:
+      - ".data/db:/var/lib/mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: root
+    ports:
+      - 13306:3306
+
+networks:
+  default:
+    name: blog_perso_network
+    driver: bridge
