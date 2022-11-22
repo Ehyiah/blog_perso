@@ -33,16 +33,13 @@ help:  ## Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 ##@ Installation
-install: env_local build up vendor node_modules generate-jwt reload down ## Install new project with docker
+install: env_local build up vendor node_modules reload down ## Install new project with docker
 
-##@ Update project when pulling
-update-with-trads: build vendor node_modules generate-jwt reload translation-import up clear-logs ## update after checkout
+update: vendor node_modules reload up clear-logs ## update after checkout
 
-update: vendor node_modules generate-jwt reload up clear-logs ## update after checkout
+update-force: build vendor node_modules reload up clear-logs ## update after checkout with rebuild of docker image
 
-update-force: build vendor node_modules generate-jwt reload up clear-logs ## update after checkout with rebuild of docker image
-
-reload: db-reload db-fixtures lawyer-import product-import ## reload application databases and usefull dependencies from salesforce
+reload: db-reload db-fixtures ## reload application databases and fixtures
 
 ##@ Create env file
 env_local: .env ## Create the .env.local file
@@ -57,9 +54,6 @@ env_local: .env ## Create the .env.local file
 		exit 0;\
 	fi
 
-generate-jwt:
-	$(CONSOLE) lexik:jwt:generate-keypair --skip-if-exists
-
 ##@ Docker
 build: ## Build the images
 	$(DOCKER_COMPOSE) build --no-cache --build-arg APP_USER_ID=$$(id -u) --build-arg APP_USER=$$(id -u -n)
@@ -67,14 +61,8 @@ build: ## Build the images
 up: ## Up the images
 	$(DOCKER_COMPOSE) up -d --remove-orphans
 
-up-prod: ## Up the images with prod compose
-	$(DOCKER_COMPOSE) -f docker-compose.prod.yaml up -d --remove-orphans
-
 down: ## Down the images
 	$(DOCKER_COMPOSE) down
-
-down-prod: ## Down the images with prod compose
-	$(DOCKER_COMPOSE) -f docker-compose.prod.yaml down
 
 destroy:down ## Destroy all containers and images
 	-docker rm $$(docker ps -a -q)
@@ -87,7 +75,7 @@ clear-logs: ## clear application logs
   	fi
 
 ## don't forget this if you dont want makefile to get files with this name
-.PHONY: build up down destroy clear-logs update update-trads install reload vendor env_local generate-jwt
+.PHONY: build up down destroy clear-logs update install reload vendor env_local
 
 ##@ Composer
 vendor: composer.lock ## Install composer dependency
@@ -147,9 +135,6 @@ clear: ## Clear cache symfony
 bash-php: ## Launch PHP bash
 	$(PHP) bash
 
-bash-nginx: ## Launch NGINX bash
-	$(NGINX) sh
-
 bash-caddy: ## Launch NGINX bash
 	$(CADDY) sh
 
@@ -159,31 +144,16 @@ bash-db: ## Launch DB bash
 server-dump: ## Launch dumper on console
 	$(CONSOLE) server:dump
 
-.PHONY: clear bash-php bash-nginx bash-db bash-caddy server-dump
+.PHONY: clear bash-php bash-db bash-caddy server-dump
 
 ##@ CI
 ci: ## Launch csfixer and phpstan and javascript quality check
 	$(YARN) lintfix
 	$(COMPOSER) ci
 
-.PHONY: ci translation-import lawyer-import ci-import product-import phptests phptestsall phptestspanther clear-screenshots
+.PHONY: ci phptests phptestsall phptestspanther clear-screenshots
 
 ##@ Commands related to application
-translation-import: ## Import yaml translation file in lexik
-	$(CONSOLE) lexik:translation:import --import-path ./translations
-
-translation-contract: ## Import yaml translation file in lexik
-	$(CONSOLE) lexik:translation:import --import-path ./translations/contracts/generator
-
-lawyer-import: ## Import lawyer from command
-	$(CONSOLE) app:lawyer:import
-
-ci-import: ## Import CI from command
-	$(CONSOLE) app:ci:import
-
-product-import: ## Import salesforce product(services) from Salesforce
-	$(CONSOLE) app:products:import
-
 clear-screenshots: ## clear panther screenshots
 	@if [ -d ./var/screenshots ]; \
 	then\
