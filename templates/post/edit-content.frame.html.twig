@@ -1,0 +1,27 @@
+<turbo-frame id="post_{{ post.id }}_content">
+    {{ form_start(form) }}
+    {{ form_errors(form) }}
+    <div data-controller="text-length">
+        {{ form_label(form.content) }}
+        {{ form_widget(form.content, {
+            'attr': {
+                'data-text-length-target': 'textarea',
+                'data-action': 'input->text-length#onChange'
+            }
+        }) }}
+        <span data-text-length-target="counter">
+            {{ post.content|length }} characters
+        </span>
+        <br>
+        {{ form_errors(form.content) }}
+    </div>
+    <div>
+        <button class="btn btn-primary" type="submit">
+            save
+        </button>
+        <a class="btn btn-link" href="{{ path('post_index') }}">
+            back
+        </a>
+    </div>
+    {{ form_end(form) }}
+</turbo-frame>

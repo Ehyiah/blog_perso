@@ -4,12 +4,6 @@
 
         # Debug mode (disable it in production!)
         {$DEBUG}
-        # HTTP/3 support
-        servers {
-                protocol {
-                        experimental_http3
-                }
-        }
 }
 
 http://blog.localhost https://blog.localhost {
