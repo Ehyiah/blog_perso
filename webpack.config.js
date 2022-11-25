@@ -22,6 +22,11 @@ Encore
      */
     .addEntry('app', './assets/app.js')
 
+    .copyFiles([
+        {from: './assets/images', to: 'images/[path][name].[ext]'},
+        // {from: './node_modules/quill/assets/icons/', to: 'icons/[path][name].[ext]'}
+    ])
+
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
     .enableStimulusBridge('./assets/controllers.json')
 
@@ -60,7 +65,7 @@ Encore
     //.enableSassLoader()
 
     // uncomment if you use TypeScript
-    //.enableTypeScriptLoader()
+    .enableTypeScriptLoader()
 
     // uncomment if you use React
     //.enableReactPreset()
