@@ -25,6 +25,10 @@
                 <th>PublishedAt</th>
                 <td>{{ post.publishedAt ? post.publishedAt|date('Y-m-d H:i:s') : '' }}</td>
             </tr>
+            <tr>
+                <th>Quill Content</th>
+                <td>{{ post.quill|raw|sanitize_html }}</td>
+            </tr>
         </tbody>
     </table>
 

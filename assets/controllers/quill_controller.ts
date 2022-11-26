@@ -9,7 +9,7 @@ export default class extends Controller {
     static values = {
         toolbarOptions: {
             type: Array,
-            default: ['bold', 'italic', ['underline']]
+            default: [],
         },
     }
 
@@ -61,6 +61,11 @@ export default class extends Controller {
             theme: 'snow'
         };
 
-        const editor = new Quill('.quill', options);  // First matching element will be used
+        const quill = new Quill('.quill', options);  // First matching element will be used
+
+        quill.on('text-change', (delta, deltaResult, source) => {
+            console.log(delta, deltaResult, source)
+            document.getElementById('post_quill').innerHTML = quill.root.innerHTML;
+        })
     }
 }

@@ -4,9 +4,11 @@ namespace App\Form;
 
 use App\DTO\Fields\BlockField\AlignField;
 use App\DTO\Fields\BlockField\ColorField;
+use App\DTO\Fields\BlockField\HeaderField;
 use App\DTO\Fields\BlockField\HeaderGroupField;
 use App\DTO\Fields\BlockField\IndentField;
 use App\DTO\Fields\InlineField\BoldInlineField;
+use App\DTO\Fields\InlineField\ItalicInlineField;
 use App\DTO\QuillGroup;
 use App\Entity\Post;
 use App\Form\Type\QuillType;
@@ -22,11 +24,10 @@ class PostType extends AbstractType
             ->add('title')
             ->add('content')
             ->add('quill', QuillType::class, [
-                'mapped' => false,
-                'quill_options' => [
+//                'quill_options' => [
 //                    QuillGroup::build(
-//                        new BoldField(),
-//                        new ItalicField(),
+//                        new BoldInlineField(),
+//                        new ItalicInlineField(),
 //                        new HeaderField(HeaderField::HEADER_OPTION_2),
 //                        new HeaderField(HeaderField::HEADER_OPTION_1),
 //                    ),
@@ -38,7 +39,7 @@ class PostType extends AbstractType
 //                        new CodeBlockField(),
 //                        new ColorField('green', 'blue'),
 //                    ),
-                    QuillGroup::build(
+//                    QuillGroup::build(
 //                        new BoldInlineField(),
 //                        new ColorField('green', 'blue'),
 //                        new HeaderField(HeaderField::HEADER_OPTION_2),
@@ -54,11 +55,7 @@ class PostType extends AbstractType
 //                        new ListField(ListField::LIST_FIELD_OPTION_BULLET, ListField::LIST_FIELD_OPTION_ORDERED),
 //                        new ListField(ListField::LIST_FIELD_OPTION_BULLET),
 //                        new ListField(ListField::LIST_FIELD_OPTION_ORDERED),
-                    ),
-                ],
-//                'quill_options' => [
-//                    'bold', 'babar',
-//                    ['italic', 'underline']
+//                    ),
 //                ],
             ])
         ;
