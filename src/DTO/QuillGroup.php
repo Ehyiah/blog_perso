@@ -8,7 +8,7 @@ use App\DTO\Fields\Interfaces\QuillInlineFieldInterface;
 
 final class QuillGroup implements QuillGroupInterface
 {
-    public static function build(QuillInlineFieldInterface|QuillBlockFieldInterface|QuillCompondFieldInterface ...$fields): array
+    public static function build(QuillInlineFieldInterface|QuillBlockFieldInterface ...$fields): array
     {
         $array = [];
         foreach ($fields as $field) {

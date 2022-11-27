@@ -1,29 +1,26 @@
 {% block quill_widget %}
     {%- set dataController = (attr['data-controller']|default('') ~ ' quill')|trim -%}
-{#    {%- set attr = attr|merge({ 'data-controller': '', class: (attr.class|default('') ~ ' quill')|trim}) -%}#}
 
-{#    {{ dump(attr['quill_options']) }}#}
 {#    <script src="//cdn.quilljs.com/1.3.7/quill.js"></script>#}
 {#    <link href="//cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">#}
 
-{#<div class="quill-container"#}
-{#     data-controller="{{ dataController }}"#}
-{#     data-quill-toolbar-options-value="{{ attr['quill_options'] }}"#}
-{#    >#}
-{#    <div data-quill-target="babar">hola</div>#}
-{#        COUCOU MON BABAR#}
-{#        {{ form_widget(form) }}#}
-{#        {{ form(form) }}#}
-{#        {{ form_widget(form, {'attr': { 'data-controller': 'quill'}}) }}#}
-{#</div>#}
-
-    <div class="quill-container">
-        <textarea style="display: none" {{ block('widget_attributes') }}>{{ value|raw|sanitize_html }}</textarea>
-        <div
-                data-controller="{{ dataController }}"
-                data-quill-toolbar-options-value="{{ attr['quill_options'] }}"
+    <div class="quill-container"
+         data-controller="{{ dataController }}"
+         data-quill-toolbar-options-value="{{ attr['quill_options'] }}"
+         data-quill-extra-options-value="{{ attr['quill_extra_options'] }}"
+    >
+        <textarea style="display: none" {{ block('widget_attributes') }}
+                  data-quill-target="input"
         >
-            <div class="quill">{{ value|raw|sanitize_html }}</div>
+            {{ value|raw|sanitize_html }}
+        </textarea>
+
+        <div>
+            <div class="quill-editor"
+                 data-quill-target="editorContainer"
+            >
+                {{ value|raw|sanitize_html }}
+            </div>
         </div>
     </div>
 {% endblock %}

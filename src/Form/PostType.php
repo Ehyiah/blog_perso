@@ -24,6 +24,10 @@ class PostType extends AbstractType
             ->add('title')
             ->add('content')
             ->add('quill', QuillType::class, [
+                'quill_extra_options' => [
+//                    'height' => '780px',
+                    'theme' => 'snow',
+                ],
 //                'quill_options' => [
 //                    QuillGroup::build(
 //                        new BoldInlineField(),

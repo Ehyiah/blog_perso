@@ -1,21 +1,31 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from "quill/dist/quill";
 
-export default class extends Controller {
-    readonly babarTarget: HTMLDivElement;
-    readonly toolbarOptionsValue: HTMLDivElement;
+type ExtraOptions = {
+    theme: string;
+    debug: string|null;
+    height: string|null;
+}
 
-    static targets = ['babar'];
+export default class extends Controller {
+    readonly inputTarget: HTMLDivElement;
+    readonly toolbarOptionsValue: HTMLDivElement;
+    readonly extraOptionsValue: ExtraOptions;
+    readonly editorContainerTarget: HTMLDivElement;
+
+    static targets = ['input', 'editorContainer'];
     static values = {
         toolbarOptions: {
             type: Array,
             default: [],
         },
+        extraOptions: {
+            type: Object,
+            default: {},
+        }
     }
 
     connect() {
-        console.log('coucou from quill controller');
-
         const test = this.toolbarOptionsValue;
         const toolbarOptions = [
             // ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
@@ -24,7 +34,7 @@ export default class extends Controller {
             // [{ 'header': 1 }, { 'header': 2 }],               // custom button values
             // [{ 'list': 'ordered'}, { 'list': 'bullet' }],
             // [{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
-            // [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+            // [{ 'indent': '-1'}, { 'indent': '+1' }],
             // [{ 'direction': 'rtl' }],                         // text direction
 
             // [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
@@ -40,32 +50,26 @@ export default class extends Controller {
             // ['clean']                                         // remove formatting button
         ];
 
-        console.log(test)
-        console.log(toolbarOptions)
+        // console.log(test)
+        // console.log(toolbarOptions)
 
         const options = {
-            // debug: 'info',
-            // modules: {
-            //     toolbar: {
-            //         container: '#toolbar',
-            //         options: toolbarOptions
-            //     }
-            // },
-            // modules: {
-            //     toolbar: '#toolbar',
-            // },
+            debug: this.extraOptionsValue.debug,
             modules: {
                 toolbar: test,
             },
             placeholder: 'Go and test Quill editor',
-            theme: 'snow'
+            theme: this.extraOptionsValue.theme,
         };
 
-        const quill = new Quill('.quill', options);  // First matching element will be used
+        const heightDefined = this.extraOptionsValue.height;
+        if (null !== heightDefined) {
+            this.editorContainerTarget.style.height = this.extraOptionsValue.height
+        }
 
+        const quill = new Quill('.quill-editor', options);
         quill.on('text-change', (delta, deltaResult, source) => {
-            console.log(delta, deltaResult, source)
-            document.getElementById('post_quill').innerHTML = quill.root.innerHTML;
+            this.inputTarget.innerHTML = quill.root.innerHTML;
         })
     }
 }
